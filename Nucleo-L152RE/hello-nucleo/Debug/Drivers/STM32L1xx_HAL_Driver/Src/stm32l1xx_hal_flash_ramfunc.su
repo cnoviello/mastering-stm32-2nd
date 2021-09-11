@@ -1,0 +1,10 @@
+stm32l1xx_hal_flash_ramfunc.c:115:30:HAL_FLASHEx_EnableRunPowerDown	4	static
+stm32l1xx_hal_flash_ramfunc.c:128:30:HAL_FLASHEx_DisableRunPowerDown	4	static
+stm32l1xx_hal_flash_ramfunc.c:165:30:HAL_FLASHEx_EraseParallelPage	24	static
+stm32l1xx_hal_flash_ramfunc.c:226:30:HAL_FLASHEx_ProgramParallelHalfPage	48	static,ignoring_inline_asm
+stm32l1xx_hal_flash_ramfunc.c:304:30:HAL_FLASHEx_HalfPageProgram	40	static,ignoring_inline_asm
+stm32l1xx_hal_flash_ramfunc.c:396:30:HAL_FLASHEx_GetError	16	static
+stm32l1xx_hal_flash_ramfunc.c:428:30:HAL_FLASHEx_DATAEEPROM_EraseDoubleWord	32	static,ignoring_inline_asm
+stm32l1xx_hal_flash_ramfunc.c:488:30:HAL_FLASHEx_DATAEEPROM_ProgramDoubleWord	40	static,ignoring_inline_asm
+stm32l1xx_hal_flash_ramfunc.c:588:37:FLASHRAM_WaitForLastOperation	16	static
+stm32l1xx_hal_flash_ramfunc.c:542:37:FLASHRAM_SetErrorCode	16	static

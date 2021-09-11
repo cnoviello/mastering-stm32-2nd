@@ -1,0 +1,15 @@
+stm32l1xx_hal_rcc.c:228:19:HAL_RCC_DeInit	16	static
+stm32l1xx_hal_rcc.c:324:19:HAL_RCC_OscConfig	40	static
+stm32l1xx_hal_rcc.c:799:19:HAL_RCC_ClockConfig	24	static
+stm32l1xx_hal_rcc.c:1005:6:HAL_RCC_MCOConfig	48	static
+stm32l1xx_hal_rcc.c:1039:6:HAL_RCC_EnableCSS	4	static
+stm32l1xx_hal_rcc.c:1048:6:HAL_RCC_DisableCSS	4	static
+stm32l1xx_hal_rcc.c:1083:10:HAL_RCC_GetSysClockFreq	40	static
+stm32l1xx_hal_rcc.c:1139:10:HAL_RCC_GetHCLKFreq	4	static
+stm32l1xx_hal_rcc.c:1150:10:HAL_RCC_GetPCLK1Freq	8	static
+stm32l1xx_hal_rcc.c:1162:10:HAL_RCC_GetPCLK2Freq	8	static
+stm32l1xx_hal_rcc.c:1175:6:HAL_RCC_GetOscConfig	16	static
+stm32l1xx_hal_rcc.c:1271:6:HAL_RCC_GetClockConfig	16	static
+stm32l1xx_hal_rcc.c:1301:6:HAL_RCC_NMI_IRQHandler	8	static
+stm32l1xx_hal_rcc.c:1318:13:HAL_RCC_CSSCallback	4	static
+stm32l1xx_hal_rcc.c:1343:26:RCC_SetFlashLatencyFromMSIRange	32	static

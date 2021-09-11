@@ -1,0 +1,7 @@
+stm32l0xx_hal_pwr_ex.c:70:10:HAL_PWREx_GetVoltageRange	8	static
+stm32l0xx_hal_pwr_ex.c:83:6:HAL_PWREx_EnableFastWakeUp	8	static
+stm32l0xx_hal_pwr_ex.c:93:6:HAL_PWREx_DisableFastWakeUp	8	static
+stm32l0xx_hal_pwr_ex.c:103:6:HAL_PWREx_EnableUltraLowPower	8	static
+stm32l0xx_hal_pwr_ex.c:113:6:HAL_PWREx_DisableUltraLowPower	8	static
+stm32l0xx_hal_pwr_ex.c:131:6:HAL_PWREx_EnableLowPowerRunMode	8	static
+stm32l0xx_hal_pwr_ex.c:146:19:HAL_PWREx_DisableLowPowerRunMode	16	static
