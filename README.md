@@ -1,2 +1,4 @@
-# mastering-stm32-2nd
-Repository for all examples in the book "Mastering STM32 - Second Edition"
+# Example projects of the Mastering STM32 book - 2nd Edition
+![](https://d2sofvawe08yqg.cloudfront.net/mastering-stm32-2nd/s_featured?1620607431)
+
+This repository contains all examples presented in the "Mastering STM32" book, [published on the *leanpub*](https://leanpub.com/mastering-stm32-2nd) self-publishing platform.
