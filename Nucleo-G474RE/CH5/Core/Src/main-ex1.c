@@ -91,7 +91,7 @@ int main(void)
   MX_GPIO_Init();
   MX_LPUART1_UART_Init();
   /* USER CODE BEGIN 2 */
-  /* Enables retarget of standard I/O over the USART2 */
+  /* Enables retarget of standard I/O over the LPUART1 */
   RetargetInit(&hlpuart1);
 
   printf("How many times to print the message?: ");
