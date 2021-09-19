@@ -47,7 +47,6 @@
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
-static void MX_GPIO_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -76,7 +75,7 @@ int main(void) {
   __HAL_RCC_GPIOA_CLK_ENABLE();
 
   /*Configure GPIO pin : PC13 */
-  GPIO_InitStruct.Pin = GPIO_PIN_13;
+  GPIO_InitStruct.Pin = GPIO_PIN_12 | GPIO_PIN_13;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
@@ -98,10 +97,15 @@ int main(void) {
 }
 
 void EXTI15_10_IRQHandler(void) {
-  if(__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_13) != RESET) {
-    __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_13);
-    HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
-  }
+	HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_12);
+	HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_13);
+}
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+	if(GPIO_Pin == GPIO_PIN_13)
+		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, SET);
+	else if(GPIO_Pin == GPIO_PIN_12)
+		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, RESET);
 }
 
 /**
@@ -142,6 +146,11 @@ void SystemClock_Config(void)
     Error_Handler();
   }
 }
+
+
+/* USER CODE BEGIN 4 */
+
+/* USER CODE END 4 */
 
 /**
   * @brief  This function is executed in case of error occurrence.

@@ -20,47 +20,9 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 
-/* Private includes ----------------------------------------------------------*/
-/* USER CODE BEGIN Includes */
-
-/* USER CODE END Includes */
-
-/* Private typedef -----------------------------------------------------------*/
-/* USER CODE BEGIN PTD */
-
-/* USER CODE END PTD */
-
-/* Private define ------------------------------------------------------------*/
-/* USER CODE BEGIN PD */
-/* USER CODE END PD */
-
-/* Private macro -------------------------------------------------------------*/
-/* USER CODE BEGIN PM */
-
-/* USER CODE END PM */
-
-/* Private variables ---------------------------------------------------------*/
-
-/* USER CODE BEGIN PV */
-
-/* USER CODE END PV */
-
-/* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
-static void MX_GPIO_Init(void);
-/* USER CODE BEGIN PFP */
+uint8_t blink=0;
 
-/* USER CODE END PFP */
-
-/* Private user code ---------------------------------------------------------*/
-/* USER CODE BEGIN 0 */
-
-/* USER CODE END 0 */
-
-/**
-  * @brief  The application entry point.
-  * @retval int
-  */
 int main(void) {
   GPIO_InitTypeDef GPIO_InitStruct = {0};
 
@@ -70,16 +32,24 @@ int main(void) {
   /* Configure the system clock */
   SystemClock_Config();
 
-  /* GPIOA and GPIOC Configuration----------------------------------------------*/
+  /* GPIOA, GPIOB and GPIOC Configuration----------------------------------------------*/
   /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOC_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin : PC13 */
   GPIO_InitStruct.Pin = GPIO_PIN_13;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PB2 */
+  GPIO_InitStruct.Pin = GPIO_PIN_2;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
 
   /*Configure GPIO pin : PA5 */
   GPIO_InitStruct.Pin = GPIO_PIN_5;
@@ -92,18 +62,36 @@ int main(void) {
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
 
   /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0x1, 0x0);
   HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
+
+  HAL_NVIC_SetPriority(EXTI2_IRQn, 0x0, 0x0);
+  HAL_NVIC_EnableIRQ(EXTI2_IRQn);
 
   while (1);
 }
 
 void EXTI15_10_IRQHandler(void) {
-  if(__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_13) != RESET) {
-    __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_13);
-    HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
-  }
+	HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_13);
 }
 
+void EXTI2_IRQHandler(void) {
+	HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_2);
+}
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+	if (GPIO_Pin == GPIO_PIN_13) {
+		blink = 1;
+		while (blink) {
+			HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+			for (volatile int i = 0; i < 100000; i++) {
+				/* Busy wait */
+			}
+		}
+	} else {
+		blink = 0;
+	}
+}
 /**
   * @brief System Clock Configuration
   * @retval None
@@ -142,6 +130,11 @@ void SystemClock_Config(void)
     Error_Handler();
   }
 }
+
+
+/* USER CODE BEGIN 4 */
+
+/* USER CODE END 4 */
 
 /**
   * @brief  This function is executed in case of error occurrence.
