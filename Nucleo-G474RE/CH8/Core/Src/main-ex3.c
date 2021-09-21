@@ -28,7 +28,7 @@
 #define MAIN_MENU   "Select the option you are interested in:\r\n\t1. Toggle LD2 LED\r\n\t2. Read USER BUTTON status\r\n\t3. Clear screen and print this message "
 #define PROMPT "\r\n> "
 
-UART_HandleTypeDef hlpuart1;
+UART_HandleTypeDef huart2;
 char readBuf[1];
 uint8_t txData;
 __IO ITStatus UartReady = SET;
@@ -36,7 +36,7 @@ RingBuffer txBuf, rxBuf;
 
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
-static void MX_LPUART1_UART_Init(void);
+static void MX_USART2_UART_Init(void);
 void performCriticalTasks(void);
 void printWelcomeMessage(void);
 uint8_t processUserInput(uint8_t opt);
@@ -53,11 +53,11 @@ int main(void) {
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_LPUART1_UART_Init();
+  MX_USART2_UART_Init();
 
-  /* Enable LPUART1 interrupt */
-  HAL_NVIC_SetPriority(LPUART1_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(LPUART1_IRQn);
+  /* Enable USART2 interrupt */
+  HAL_NVIC_SetPriority(USART2_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(USART2_IRQn);
 
 printMessage:
 
@@ -82,8 +82,8 @@ uint8_t UART_Transmit(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t len) {
   return 1;
 }
 
-void LPUART1_IRQHandler(void) {
-  HAL_UART_IRQHandler(&hlpuart1);
+void USART2_IRQHandler(void) {
+  HAL_UART_IRQHandler(&huart2);
 }
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle) {
@@ -106,7 +106,7 @@ void printWelcomeMessage(void) {
   char *strings[] = {"\033[0;0H", "\033[2J", WELCOME_MSG, MAIN_MENU, PROMPT};
 
   for (uint8_t i = 0; i < 5; i++)
-    UART_Transmit(&hlpuart1, (uint8_t*)strings[i], strlen(strings[i]));
+    UART_Transmit(&huart2, (uint8_t*)strings[i], strlen(strings[i]));
 }
 
 uint8_t processUserInput(uint8_t opt) {
@@ -116,7 +116,7 @@ uint8_t processUserInput(uint8_t opt) {
     return 0;
 
   sprintf(msg, "%d", opt);
-  UART_Transmit(&hlpuart1, (uint8_t*)msg, strlen(msg));
+  UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg));
 
   switch(opt) {
   case 1:
@@ -124,13 +124,13 @@ uint8_t processUserInput(uint8_t opt) {
     break;
   case 2:
     sprintf(msg, "\r\nUSER BUTTON status: %s", HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13) == GPIO_PIN_SET ? "PRESSED" : "RELEASED");
-    UART_Transmit(&hlpuart1, (uint8_t*)msg, strlen(msg));
+    UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg));
     break;
   case 3:
     return 2;
   };
 
-  UART_Transmit(&hlpuart1, (uint8_t*)PROMPT, strlen(PROMPT));
+  UART_Transmit(&huart2, (uint8_t*)PROMPT, strlen(PROMPT));
   return 1;
 }
 
@@ -139,7 +139,7 @@ int8_t readUserInput(void) {
 
   if(UartReady == SET) {
     UartReady = RESET;
-    HAL_UART_Receive_IT(&hlpuart1, (uint8_t*)readBuf, 1);
+    HAL_UART_Receive_IT(&huart2, (uint8_t*)readBuf, 1);
     retVal = atoi(readBuf);
   }
   return retVal;
@@ -190,8 +190,8 @@ void SystemClock_Config(void)
   }
   /** Initializes the peripherals clocks
   */
-  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_LPUART1;
-  PeriphClkInit.Lpuart1ClockSelection = RCC_LPUART1CLKSOURCE_PCLK1;
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART2;
+  PeriphClkInit.Usart2ClockSelection = RCC_USART2CLKSOURCE_PCLK1;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
   {
     Error_Handler();
@@ -199,51 +199,53 @@ void SystemClock_Config(void)
 }
 
 /**
-  * @brief LPUART Initialization Function
+  * @brief USART2 Initialization Function
   * @param None
   * @retval None
   */
-static void MX_LPUART1_UART_Init(void)
+static void MX_USART2_UART_Init(void)
 {
 
-  /* USER CODE BEGIN LPUART1_Init 0 */
+  /* USER CODE BEGIN USART2_Init 0 */
 
-  /* USER CODE END LPUART1_Init 0 */
+  /* USER CODE END USART2_Init 0 */
 
-  /* USER CODE BEGIN LPUART1_Init 1 */
+  /* USER CODE BEGIN USART2_Init 1 */
 
-  /* USER CODE END LPUART1_Init 1 */
-  hlpuart1.Instance = LPUART1;
-  hlpuart1.Init.BaudRate = 115200;
-  hlpuart1.Init.WordLength = UART_WORDLENGTH_8B;
-  hlpuart1.Init.StopBits = UART_STOPBITS_1;
-  hlpuart1.Init.Parity = UART_PARITY_NONE;
-  hlpuart1.Init.Mode = UART_MODE_TX_RX;
-  hlpuart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-  hlpuart1.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
-  hlpuart1.Init.ClockPrescaler = UART_PRESCALER_DIV1;
-  hlpuart1.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
-  if (HAL_UART_Init(&hlpuart1) != HAL_OK)
+  /* USER CODE END USART2_Init 1 */
+  huart2.Instance = USART2;
+  huart2.Init.BaudRate = 115200;
+  huart2.Init.WordLength = UART_WORDLENGTH_8B;
+  huart2.Init.StopBits = UART_STOPBITS_1;
+  huart2.Init.Parity = UART_PARITY_NONE;
+  huart2.Init.Mode = UART_MODE_TX_RX;
+  huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart2.Init.OverSampling = UART_OVERSAMPLING_16;
+  huart2.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
+  huart2.Init.ClockPrescaler = UART_PRESCALER_DIV1;
+  huart2.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
+  if (HAL_UART_Init(&huart2) != HAL_OK)
   {
     Error_Handler();
   }
-  if (HAL_UARTEx_SetTxFifoThreshold(&hlpuart1, UART_TXFIFO_THRESHOLD_1_8) != HAL_OK)
+  if (HAL_UARTEx_SetTxFifoThreshold(&huart2, UART_TXFIFO_THRESHOLD_1_8) != HAL_OK)
   {
     Error_Handler();
   }
-  if (HAL_UARTEx_SetRxFifoThreshold(&hlpuart1, UART_RXFIFO_THRESHOLD_1_8) != HAL_OK)
+  if (HAL_UARTEx_SetRxFifoThreshold(&huart2, UART_RXFIFO_THRESHOLD_1_8) != HAL_OK)
   {
     Error_Handler();
   }
-  if (HAL_UARTEx_DisableFifoMode(&hlpuart1) != HAL_OK)
+  if (HAL_UARTEx_DisableFifoMode(&huart2) != HAL_OK)
   {
     Error_Handler();
   }
-  /* USER CODE BEGIN LPUART1_Init 2 */
+  /* USER CODE BEGIN USART2_Init 2 */
 
-  /* USER CODE END LPUART1_Init 2 */
+  /* USER CODE END USART2_Init 2 */
 
 }
+
 /**
   * @brief GPIO Initialization Function
   * @param None
@@ -274,13 +276,7 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(LD2_GPIO_Port, &GPIO_InitStruct);
-
-  /* EXTI interrupt init*/
-  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
-
 }
-
 
 /* USER CODE BEGIN 4 */
 
