@@ -1,6 +1,0 @@
-main-ex1.c:38:5:main	8	static
-main-ex1.c:73:13:MX_ADC1_Init	56	static
-main-ex1.c:121:6:SystemClock_Config	168	static
-main-ex1.c:177:13:MX_USART2_UART_Init	8	static
-main-ex1.c:210:13:MX_GPIO_Init	48	static
-main-ex1.c:245:6:Error_Handler	4	static,ignoring_inline_asm

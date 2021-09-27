@@ -65,7 +65,7 @@ int main(void) {
 
      for(uint8_t i = 0; i < hadc1.Init.NbrOfConversion; i++) {
       temp = ((float)rawValues[i]) / 4095 * 3300;
-      temp = ((temp - 1400.0) / 4.3) + 25;
+      temp = ((temp - 760.0) / 2.5) + 25;
 
       sprintf(msg, "rawValue %d: %hu\r\n", i, rawValues[i]);
       HAL_UART_Transmit(&huart2, (uint8_t*) msg, strlen(msg), HAL_MAX_DELAY);
@@ -87,39 +87,38 @@ static void MX_ADC1_Init(void) {
   /** Configure the global features of the ADC (Clock, Resolution,
    *  Data Alignment and number of conversion) */
   hadc1.Instance = ADC1;
-  hadc1.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV1;
+  hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4;
   hadc1.Init.Resolution = ADC_RESOLUTION_12B;
-  hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-  hadc1.Init.ScanConvMode = ADC_SCAN_DISABLE;
-  hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
-  hadc1.Init.LowPowerAutoWait = DISABLE;
+  hadc1.Init.ScanConvMode = DISABLE;
   hadc1.Init.ContinuousConvMode = DISABLE;
-  hadc1.Init.NbrOfConversion = 3;
   hadc1.Init.DiscontinuousConvMode = DISABLE;
-  hadc1.Init.ExternalTrigConv = ADC1_2_EXTERNALTRIG_T2_TRGO;
+  hadc1.Init.ExternalTrigConv = ADC_EXTERNALTRIG_T2_TRGO;
   hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_RISING;
+  hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+  hadc1.Init.NbrOfConversion = 3;
   hadc1.Init.DMAContinuousRequests = ENABLE;
-  hadc1.Init.Overrun = ADC_OVR_DATA_PRESERVED;
+  hadc1.Init.EOCSelection = ADC_EOC_SEQ_CONV;
   HAL_ADC_Init(&hadc1);
 
   /** Configure for the selected ADC regular channel its corresponding
    *  rank in the sequencer and its sample time. */
   sConfig.Channel = ADC_CHANNEL_TEMPSENSOR_ADC1;
-  sConfig.Rank = 1;
+  sConfig.Rank = LL_ADC_REG_RANK_1;
   sConfig.SamplingTime = ADC_SAMPLETIME_640CYCLES_5;
   sConfig.SingleDiff = ADC_SINGLE_ENDED;
   sConfig.OffsetNumber = ADC_OFFSET_NONE;
   sConfig.Offset = 0;
   HAL_ADC_ConfigChannel(&hadc1, &sConfig);
 
-  sConfig.Rank = 2;
+  sConfig.Rank = LL_ADC_REG_RANK_2;
   HAL_ADC_ConfigChannel(&hadc1, &sConfig);
 
-  sConfig.Rank = 3;
+  sConfig.Rank = LL_ADC_REG_RANK_3;
   HAL_ADC_ConfigChannel(&hadc1, &sConfig);
 
   /* ADC1 DMA Init */
   hdma_adc1.Instance = DMA1_Channel1;
+  hdma_adc1.Init.Request = DMA_REQUEST_ADC1;
   hdma_adc1.Init.Direction = DMA_PERIPH_TO_MEMORY;
   hdma_adc1.Init.PeriphInc = DMA_PINC_DISABLE;
   hdma_adc1.Init.MemInc = DMA_MINC_ENABLE;
@@ -127,7 +126,7 @@ static void MX_ADC1_Init(void) {
   hdma_adc1.Init.MemDataAlignment = DMA_MDATAALIGN_HALFWORD;
   hdma_adc1.Init.Mode = DMA_CIRCULAR;
   hdma_adc1.Init.Priority = DMA_PRIORITY_LOW;
-  HAL_DMA_Init(&hdma_adc1);
+  if (HAL_DMA_Init(&hdma_adc1) != HAL_OK);
 
   __HAL_LINKDMA(&hadc1,DMA_Handle,hdma_adc1);
 
@@ -140,7 +139,7 @@ static void MX_TIM2_Init(void) {
   htim2.Instance = TIM2;
   htim2.Init.Prescaler = 31999;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 1999;
+  htim2.Init.Period = 3999;
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   HAL_TIM_Base_Init(&htim2);
@@ -156,6 +155,7 @@ static void MX_TIM2_Init(void) {
 
 static void MX_DMA_Init(void) {
   /* DMA controller clock enable */
+  __HAL_RCC_DMAMUX1_CLK_ENABLE();
   __HAL_RCC_DMA1_CLK_ENABLE();
 
   /* DMA interrupt init */
@@ -178,6 +178,9 @@ void SystemClock_Config(void)
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
   RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
 
+  /** Configure the main internal regulator output voltage
+  */
+  HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE1_BOOST);
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
@@ -186,8 +189,11 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
-  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL9;
-  RCC_OscInitStruct.PLL.PREDIV = RCC_PREDIV_DIV1;
+  RCC_OscInitStruct.PLL.PLLM = RCC_PLLM_DIV4;
+  RCC_OscInitStruct.PLL.PLLN = 85;
+  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
+  RCC_OscInitStruct.PLL.PLLQ = RCC_PLLQ_DIV2;
+  RCC_OscInitStruct.PLL.PLLR = RCC_PLLR_DIV2;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -198,16 +204,18 @@ void SystemClock_Config(void)
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4) != HAL_OK)
   {
     Error_Handler();
   }
+  /** Initializes the peripherals clocks
+  */
   PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART2|RCC_PERIPHCLK_ADC12;
   PeriphClkInit.Usart2ClockSelection = RCC_USART2CLKSOURCE_PCLK1;
-  PeriphClkInit.Adc12ClockSelection = RCC_ADC12PLLCLK_DIV1;
+  PeriphClkInit.Adc12ClockSelection = RCC_ADC12CLKSOURCE_SYSCLK;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
   {
     Error_Handler();
