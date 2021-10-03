@@ -55,6 +55,8 @@
 
 /* USER CODE END 0 */
 
+/* External variables --------------------------------------------------------*/
+
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -138,7 +140,6 @@ void SysTick_Handler(void)
 /* For the available peripheral interrupt handler names,                      */
 /* please refer to the startup file (startup_stm32f0xx.s).                    */
 /******************************************************************************/
-
 
 /* USER CODE BEGIN 1 */
 
