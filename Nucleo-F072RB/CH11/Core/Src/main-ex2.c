@@ -16,10 +16,7 @@ int main(void) {
   htim6.Init.Prescaler = 47999; //48MHz/48000 = 1000Hz
   htim6.Init.Period = 499;      //1000HZ / 500 = 2Hz = 0.5s
 
-  __TIM6_CLK_ENABLE();
-
-  HAL_NVIC_SetPriority(TIM6_DAC_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(TIM6_DAC_IRQn);
+  __HAL_RCC_TIM6_CLK_ENABLE();
 
   HAL_TIM_Base_Init(&htim6);
 
@@ -38,15 +35,6 @@ int main(void) {
   __HAL_TIM_ENABLE_DMA(&htim6, TIM_DMA_UPDATE);
 
   while (1);
-}
-
-void TIM6_DAC_IRQHandler(void){
-  HAL_TIM_IRQHandler(&htim6);
-}
-
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
-  if(htim->Instance == TIM6)
-    HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
 }
 
 void Error_Handler(void)
