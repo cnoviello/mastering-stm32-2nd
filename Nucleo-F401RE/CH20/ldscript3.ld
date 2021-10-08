@@ -37,15 +37,15 @@ SECTIONS
     } >SRAM AT>FLASH
     
      /* Uninitialized data section */
-		.bss (NOLOAD) : ALIGN(4)
-		{
-		  _sbss = .;         /* define a global symbol at bss start */
-	  
-		  *(.bss)
-		  *(.bss*)
-		  *(COMMON)
-		  		
-		  . = ALIGN(4);
-		  _ebss = .;         /* define a global symbol at bss end */
-		} >SRAM
+	.bss (NOLOAD) : ALIGN(4)
+	{
+	  _sbss = .;         /* define a global symbol at bss start */
+  
+	  *(.bss)
+	  *(.bss*)
+	  *(COMMON)
+	  		
+	  . = ALIGN(4);
+	  _ebss = .;         /* define a global symbol at bss end */
+	} >SRAM
 }    
