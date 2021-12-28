@@ -7,13 +7,12 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) 2021 STMicroelectronics.
-  * All rights reserved.</center></h2>
+  * Copyright (c) 2021 STMicroelectronics.
+  * All rights reserved.
   *
-  * This software component is licensed by ST under Ultimate Liberty license
-  * SLA0044, the "License"; You may not use this file except in compliance with
-  * the License. You may obtain a copy of the License at:
-  *                             www.st.com/SLA0044
+  * This software is licensed under terms that can be found in the LICENSE file
+  * in the root directory of this software component.
+  * If no LICENSE file comes with this software, it is provided AS-IS.
   *
   ******************************************************************************
   */
@@ -22,10 +21,9 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f0xx.h"
 #include "stm32f0xx_hal.h"
-
-#include "../../Middlewares_EX1/ST/STM32_USB_Device_Library/Class/CDC/Inc/usbd_cdc.h"
-#include "../../Middlewares_EX1/ST/STM32_USB_Device_Library/Core/Inc/usbd_core.h"
-#include "../../Middlewares_EX1/ST/STM32_USB_Device_Library/Core/Inc/usbd_def.h"
+#include "usbd_def.h"
+#include "usbd_core.h"
+#include "usbd_customhid.h"
 
 /* USER CODE BEGIN Includes */
 
@@ -336,11 +334,10 @@ USBD_StatusTypeDef USBD_LL_Init(USBD_HandleTypeDef *pdev)
   HAL_PCDEx_PMAConfig((PCD_HandleTypeDef*)pdev->pData , 0x00 , PCD_SNG_BUF, 0x18);
   HAL_PCDEx_PMAConfig((PCD_HandleTypeDef*)pdev->pData , 0x80 , PCD_SNG_BUF, 0x58);
   /* USER CODE END EndPoint_Configuration */
-  /* USER CODE BEGIN EndPoint_Configuration_CDC */
-  HAL_PCDEx_PMAConfig((PCD_HandleTypeDef*)pdev->pData , 0x81 , PCD_SNG_BUF, 0xC0);
-  HAL_PCDEx_PMAConfig((PCD_HandleTypeDef*)pdev->pData , 0x01 , PCD_SNG_BUF, 0x110);
-  HAL_PCDEx_PMAConfig((PCD_HandleTypeDef*)pdev->pData , 0x82 , PCD_SNG_BUF, 0x100);
-  /* USER CODE END EndPoint_Configuration_CDC */
+  /* USER CODE BEGIN EndPoint_Configuration_CUSTOM_HID */
+  HAL_PCDEx_PMAConfig((PCD_HandleTypeDef*)pdev->pData , CUSTOM_HID_EPIN_ADDR , PCD_SNG_BUF, 0x98);
+  HAL_PCDEx_PMAConfig((PCD_HandleTypeDef*)pdev->pData , CUSTOM_HID_EPOUT_ADDR , PCD_SNG_BUF, 0xD8);
+  /* USER CODE END EndPoint_Configuration_CUSTOM_HID */
   return USBD_OK;
 }
 
@@ -593,7 +590,7 @@ void USBD_LL_Delay(uint32_t Delay)
   */
 void *USBD_static_malloc(uint32_t size)
 {
-  static uint32_t mem[(sizeof(USBD_CDC_HandleTypeDef)/4)+1];/* On 32-bit boundary */
+  static uint32_t mem[(sizeof(USBD_CUSTOM_HID_HandleTypeDef)/4+1)];/* On 32-bit boundary */
   return mem;
 }
 
@@ -648,4 +645,3 @@ USBD_StatusTypeDef USBD_Get_USB_Status(HAL_StatusTypeDef hal_status)
   }
   return usb_status;
 }
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

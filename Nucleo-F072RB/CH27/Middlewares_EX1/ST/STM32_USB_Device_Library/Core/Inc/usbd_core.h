@@ -26,10 +26,10 @@ extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
-#include "../../../../../USB_DEVICE_EX1/Target/usbd_conf.h"
-#include "usbd_def.h"
-#include "usbd_ioreq.h"
-#include "usbd_ctlreq.h"
+#include "usbd_conf.h"
+#include "../../../../../Middlewares_EX1/ST/STM32_USB_Device_Library/Core/Inc/usbd_def.h"
+#include "../../../../../Middlewares_EX1/ST/STM32_USB_Device_Library/Core/Inc/usbd_ioreq.h"
+#include "../../../../../Middlewares_EX1/ST/STM32_USB_Device_Library/Core/Inc/usbd_ctlreq.h"
 
 /** @addtogroup STM32_USB_DEVICE_LIBRARY
   * @{

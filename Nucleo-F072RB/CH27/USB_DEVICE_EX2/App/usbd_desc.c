@@ -7,23 +7,23 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) 2021 STMicroelectronics.
-  * All rights reserved.</center></h2>
+  * Copyright (c) 2021 STMicroelectronics.
+  * All rights reserved.
   *
-  * This software component is licensed by ST under Ultimate Liberty license
-  * SLA0044, the "License"; You may not use this file except in compliance with
-  * the License. You may obtain a copy of the License at:
-  *                             www.st.com/SLA0044
+  * This software is licensed under terms that can be found in the LICENSE file
+  * in the root directory of this software component.
+  * If no LICENSE file comes with this software, it is provided AS-IS.
   *
   ******************************************************************************
   */
 /* USER CODE END Header */
 
 /* Includes ------------------------------------------------------------------*/
-#include "../../USB_DEVICE_EX1/App/usbd_desc.h"
+#include "../../USB_DEVICE_EX2/App/usbd_desc.h"
 
-#include "../../Middlewares_EX1/ST/STM32_USB_Device_Library/Core/Inc/usbd_core.h"
-#include "../../USB_DEVICE_EX1/Target/usbd_conf.h"
+#include "usbd_core.h"
+
+#include "../../USB_DEVICE_EX2/Target/usbd_conf.h"
 
 /* USER CODE BEGIN INCLUDE */
 
@@ -67,10 +67,10 @@
 #define USBD_VID     1155
 #define USBD_LANGID_STRING     1033
 #define USBD_MANUFACTURER_STRING     "STMicroelectronics"
-#define USBD_PID_FS     22336
-#define USBD_PRODUCT_STRING_FS     "STM32 Virtual ComPort"
-#define USBD_CONFIGURATION_STRING_FS     "CDC Config"
-#define USBD_INTERFACE_STRING_FS     "CDC Interface"
+#define USBD_PID_FS     22352
+#define USBD_PRODUCT_STRING_FS     "STM32 Custom Human interface"
+#define USBD_CONFIGURATION_STRING_FS     "Custom HID Config"
+#define USBD_INTERFACE_STRING_FS     "Custom HID Interface"
 
 /* USER CODE BEGIN PRIVATE_DEFINES */
 
@@ -152,8 +152,8 @@ __ALIGN_BEGIN uint8_t USBD_FS_DeviceDesc[USB_LEN_DEV_DESC] __ALIGN_END =
   USB_DESC_TYPE_DEVICE,       /*bDescriptorType*/
   0x00,                       /*bcdUSB */
   0x02,
-  0x02,                       /*bDeviceClass*/
-  0x02,                       /*bDeviceSubClass*/
+  0x00,                       /*bDeviceClass*/
+  0x00,                       /*bDeviceSubClass*/
   0x00,                       /*bDeviceProtocol*/
   USB_MAX_EP0_SIZE,           /*bMaxPacketSize*/
   LOBYTE(USBD_VID),           /*idVendor*/
@@ -392,4 +392,3 @@ static void IntToUnicode(uint32_t value, uint8_t * pbuf, uint8_t len)
   * @}
   */
 
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
