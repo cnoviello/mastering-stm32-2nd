@@ -90,10 +90,26 @@
 /** Usb HID report descriptor. */
 __ALIGN_BEGIN static uint8_t CUSTOM_HID_ReportDesc_FS[USBD_CUSTOM_HID_REPORT_DESC_SIZE] __ALIGN_END =
 {
-  /* USER CODE BEGIN 0 */
-  0x00,
-  /* USER CODE END 0 */
-  0xC0    /*     END_COLLECTION	             */
+		/* USER CODE BEGIN 0 */
+			  0x05, 0x01,                    // USAGE_PAGE (Generic Desktop)
+			  0x09, 0x00,                    // USAGE (Undefined)
+			  0xa1, 0x01,                    // COLLECTION (Application)
+			  0x15, 0x00,                    //   LOGICAL_MINIMUM (0)
+			  0x26, 0xff, 0x00,              //   LOGICAL_MAXIMUM (255)
+			  // IN report
+			  0x85, 0x01,                    //   REPORT_ID (1)
+			  0x75, 0x08,                    //   REPORT_SIZE (8)
+			  0x95, USBD_CUSTOMHID_OUTREPORT_BUF_SIZE-1,        //   REPORT_COUNT (this is the byte length)
+			  0x09, 0x00,                    //   USAGE (Undefined)
+			  0x81, 0x82,                    //   INPUT (Data,Var,Abs,Vol)
+			  // OUT report
+			  0x85, 0x02,                    //   REPORT_ID (2)
+			  0x75, 0x08,                    //   REPORT_SIZE (8)
+			  0x95, USBD_CUSTOMHID_OUTREPORT_BUF_SIZE-1,       //   REPORT_COUNT (this is the byte length)
+			  0x09, 0x00,                    //   USAGE (Undefined)
+			  0x91, 0x82,                    //   OUTPUT (Data,Var,Abs,Vol)
+		/* USER CODE END 0 */
+		0xC0    /*     END_COLLECTION	             */
 };
 
 /* USER CODE BEGIN PRIVATE_VARIABLES */
@@ -176,6 +192,8 @@ static int8_t CUSTOM_HID_DeInit_FS(void)
 static int8_t CUSTOM_HID_OutEvent_FS(uint8_t event_idx, uint8_t state)
 {
   /* USER CODE BEGIN 6 */
+	uint8_t report[] = {0x1, 0xAA};
+  //USBD_CUSTOM_HID_SendReport(&hUsbDeviceFS, report, 2);
   return (USBD_OK);
   /* USER CODE END 6 */
 }
