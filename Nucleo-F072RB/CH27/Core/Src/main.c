@@ -19,11 +19,8 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "usb_device.h"
 #include "retarget.h"
-
-/* Private includes ----------------------------------------------------------*/
-/* USER CODE BEGIN Includes */
+#include "../../USB_DEVICE_EX1/App/usb_device.h"
 
 /* USER CODE END Includes */
 
@@ -100,8 +97,7 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-	  printf("Testing UART\r\n");
-	  while(1);
+
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */

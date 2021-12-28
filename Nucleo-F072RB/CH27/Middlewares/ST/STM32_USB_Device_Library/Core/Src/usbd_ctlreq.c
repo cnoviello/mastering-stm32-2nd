@@ -437,7 +437,7 @@ static void USBD_GetDescriptor(USBD_HandleTypeDef *pdev,
       else
       {
         pbuf = pdev->pClass->GetFSConfigDescriptor(&len);
-        //pbuf[1] = USB_DESC_TYPE_CONFIGURATION;
+        pbuf[1] = USB_DESC_TYPE_CONFIGURATION;
       }
       break;
 
