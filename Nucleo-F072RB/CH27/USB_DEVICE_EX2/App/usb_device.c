@@ -90,15 +90,15 @@ void MX_USB_DEVICE_Init(void)
   /* USER CODE BEGIN USB_DEVICE_Init_PostTreatment */
   uint8_t report[] = {0x1, 0, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xA, 0xB, 0xC};
 
-  while(1) {
-	  if(HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin) == GPIO_PIN_RESET) {
-		  HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-		  USBD_CUSTOM_HID_SendReport(&hUsbDeviceFS, report, 12);
-		  report[1]++;
-		  HAL_Delay(200);
-	  }
-
-  }
+//  while(1) {
+//	  if(HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin) == GPIO_PIN_RESET) {
+////		  HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+//		  USBD_CUSTOM_HID_SendReport(&hUsbDeviceFS, report, 12);
+//		  report[1]++;
+//		  HAL_Delay(200);
+//	  }
+//
+//  }
 
   /* USER CODE END USB_DEVICE_Init_PostTreatment */
 }

@@ -31,6 +31,7 @@
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
+extern DAC_HandleTypeDef hdac;
 
 /* USER CODE END PV */
 
@@ -192,7 +193,8 @@ static int8_t CUSTOM_HID_DeInit_FS(void)
 static int8_t CUSTOM_HID_OutEvent_FS(uint8_t event_idx, uint8_t state)
 {
   /* USER CODE BEGIN 6 */
-  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, state);
+//  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, state);
+	HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2, DAC_ALIGN_12B_R, (uint32_t)((event_idx << 8) | state));
   return (USBD_OK);
   /* USER CODE END 6 */
 }
