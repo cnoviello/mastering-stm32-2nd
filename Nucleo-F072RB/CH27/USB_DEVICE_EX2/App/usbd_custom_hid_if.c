@@ -192,8 +192,7 @@ static int8_t CUSTOM_HID_DeInit_FS(void)
 static int8_t CUSTOM_HID_OutEvent_FS(uint8_t event_idx, uint8_t state)
 {
   /* USER CODE BEGIN 6 */
-	uint8_t report[] = {0x1, 0xAA};
-  //USBD_CUSTOM_HID_SendReport(&hUsbDeviceFS, report, 2);
+  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, state);
   return (USBD_OK);
   /* USER CODE END 6 */
 }
