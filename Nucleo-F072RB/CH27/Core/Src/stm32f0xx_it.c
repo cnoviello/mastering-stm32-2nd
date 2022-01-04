@@ -57,6 +57,7 @@
 
 /* External variables --------------------------------------------------------*/
 extern PCD_HandleTypeDef hpcd_USB_FS;
+
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -156,6 +157,10 @@ void USB_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
+
+void EXTI4_15_IRQHandler(void) {
+	HAL_GPIO_EXTI_IRQHandler(B1_Pin);
+}
 
 /* USER CODE END 1 */
 

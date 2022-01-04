@@ -72,7 +72,7 @@
 /*---------- -----------*/
 #define USBD_SELF_POWERED     1
 /*---------- -----------*/
-#define USBD_CUSTOMHID_OUTREPORT_BUF_SIZE     12
+#define USBD_CUSTOMHID_OUTREPORT_BUF_SIZE     4
 /*---------- -----------*/
 #define USBD_CUSTOM_HID_REPORT_DESC_SIZE     32
 /*---------- -----------*/

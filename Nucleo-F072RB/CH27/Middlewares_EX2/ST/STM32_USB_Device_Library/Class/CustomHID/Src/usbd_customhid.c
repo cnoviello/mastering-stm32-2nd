@@ -436,6 +436,8 @@ static uint8_t  USBD_CUSTOM_HID_Setup(USBD_HandleTypeDef *pdev,
   uint8_t  *pbuf = NULL;
   uint16_t status_info = 0U;
   uint8_t ret = USBD_OK;
+  uint8_t report[USBD_CUSTOMHID_OUTREPORT_BUF_SIZE];
+  uint8_t reportLen = 0;
 
   switch (req->bmRequest & USB_REQ_TYPE_MASK)
   {
@@ -456,6 +458,17 @@ static uint8_t  USBD_CUSTOM_HID_Setup(USBD_HandleTypeDef *pdev,
 
         case CUSTOM_HID_REQ_GET_IDLE:
           USBD_CtlSendData(pdev, (uint8_t *)(void *)&hhid->IdleState, 1U);
+          break;
+
+        case CUSTOM_HID_REQ_GET_REPORT:
+          ((USBD_CUSTOM_HID_ItfTypeDef *)pdev->pUserData)->GetData(report, &reportLen);
+          if(reportLen == USBD_CUSTOMHID_OUTREPORT_BUF_SIZE) {
+        	  USBD_CtlSendData(pdev, report, reportLen);
+        	  ret = USBD_OK;
+          } else {
+        	  USBD_CtlError(pdev, req);
+        	  ret = USBD_FAIL;
+          }
           break;
 
         case CUSTOM_HID_REQ_SET_REPORT:
@@ -639,8 +652,7 @@ static uint8_t  USBD_CUSTOM_HID_DataOut(USBD_HandleTypeDef *pdev,
 
   USBD_CUSTOM_HID_HandleTypeDef     *hhid = (USBD_CUSTOM_HID_HandleTypeDef *)pdev->pClassData;
 
-  ((USBD_CUSTOM_HID_ItfTypeDef *)pdev->pUserData)->OutEvent(hhid->Report_buf[1],
-                                                            hhid->Report_buf[2]);
+  ((USBD_CUSTOM_HID_ItfTypeDef *)pdev->pUserData)->OutEvent(hhid->Report_buf, USBD_CUSTOMHID_OUTREPORT_BUF_SIZE);
 
   USBD_LL_PrepareReceive(pdev, CUSTOM_HID_EPOUT_ADDR, hhid->Report_buf,
                          USBD_CUSTOMHID_OUTREPORT_BUF_SIZE);
@@ -660,8 +672,8 @@ static uint8_t USBD_CUSTOM_HID_EP0_RxReady(USBD_HandleTypeDef *pdev)
 
   if (hhid->IsReportAvailable == 1U)
   {
-    ((USBD_CUSTOM_HID_ItfTypeDef *)pdev->pUserData)->OutEvent(hhid->Report_buf[0],
-                                                              hhid->Report_buf[1]);
+	  ((USBD_CUSTOM_HID_ItfTypeDef *)pdev->pUserData)->OutEvent(hhid->Report_buf, USBD_CUSTOMHID_OUTREPORT_BUF_SIZE);
+
     hhid->IsReportAvailable = 0U;
   }
 

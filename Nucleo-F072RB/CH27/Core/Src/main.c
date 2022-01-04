@@ -92,11 +92,11 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART2_UART_Init();
-  MX_USB_DEVICE_Init();
   MX_DAC_Init();
   /* USER CODE BEGIN 2 */
 
   HAL_DAC_Start(&hdac, DAC_CHANNEL_2);
+  MX_USB_DEVICE_Init();
 
   /* USER CODE END 2 */
 
@@ -242,10 +242,12 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin : B1_Pin */
   GPIO_InitStruct.Pin = B1_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
 
+  HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
+  HAL_NVIC_SetPriority(EXTI4_15_IRQn, 1, 0);
 }
 
 /* USER CODE BEGIN 4 */

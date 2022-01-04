@@ -21,15 +21,6 @@
 /* Includes ------------------------------------------------------------------*/
 #include "../../USB_DEVICE_EX2/App/usbd_custom_hid_if.h"
 
-/* USER CODE BEGIN INCLUDE */
-
-/* USER CODE END INCLUDE */
-
-/* Private typedef -----------------------------------------------------------*/
-/* Private define ------------------------------------------------------------*/
-/* Private macro -------------------------------------------------------------*/
-
-/* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
 extern DAC_HandleTypeDef hdac;
 
@@ -89,28 +80,27 @@ extern DAC_HandleTypeDef hdac;
   */
 
 /** Usb HID report descriptor. */
-__ALIGN_BEGIN static uint8_t CUSTOM_HID_ReportDesc_FS[USBD_CUSTOM_HID_REPORT_DESC_SIZE] __ALIGN_END =
-{
-		/* USER CODE BEGIN 0 */
-			  0x05, 0x01,                    // USAGE_PAGE (Generic Desktop)
-			  0x09, 0x00,                    // USAGE (Undefined)
-			  0xa1, 0x01,                    // COLLECTION (Application)
-			  0x15, 0x00,                    //   LOGICAL_MINIMUM (0)
-			  0x26, 0xff, 0x00,              //   LOGICAL_MAXIMUM (255)
-			  // IN report
-			  0x85, 0x01,                    //   REPORT_ID (1)
-			  0x75, 0x08,                    //   REPORT_SIZE (8)
-			  0x95, USBD_CUSTOMHID_OUTREPORT_BUF_SIZE-1,        //   REPORT_COUNT (this is the byte length)
-			  0x09, 0x00,                    //   USAGE (Undefined)
-			  0x81, 0x82,                    //   INPUT (Data,Var,Abs,Vol)
-			  // OUT report
-			  0x85, 0x02,                    //   REPORT_ID (2)
-			  0x75, 0x08,                    //   REPORT_SIZE (8)
-			  0x95, USBD_CUSTOMHID_OUTREPORT_BUF_SIZE-1,       //   REPORT_COUNT (this is the byte length)
-			  0x09, 0x00,                    //   USAGE (Undefined)
-			  0x91, 0x82,                    //   OUTPUT (Data,Var,Abs,Vol)
-		/* USER CODE END 0 */
-		0xC0    /*     END_COLLECTION	             */
+__ALIGN_BEGIN static const uint8_t CUSTOM_HID_ReportDesc_FS[USBD_CUSTOM_HID_REPORT_DESC_SIZE] __ALIGN_END = {
+	/* USER CODE BEGIN 0 */
+	  0x05, 0x01,                    // USAGE_PAGE (Generic Desktop)
+	  0x09, 0x00,                    // USAGE (Undefined)
+	  0xa1, 0x01,                    // COLLECTION (Application)
+	  0x15, 0x00,                    //   LOGICAL_MINIMUM (0)
+	  0x26, 0xff, 0x00,              //   LOGICAL_MAXIMUM (255)
+	  // IN report
+	  0x85, 0x01,                    //   REPORT_ID (1)
+	  0x75, 0x08,                    //   REPORT_SIZE (8)
+	  0x95, USBD_CUSTOMHID_OUTREPORT_BUF_SIZE-1,        //   REPORT_COUNT (this is the byte length)
+	  0x09, 0x00,                    //   USAGE (Undefined)
+	  0x81, 0x82,                    //   INPUT (Data,Var,Abs,Vol)
+	  // OUT report
+	  0x85, 0x02,                    //   REPORT_ID (2)
+	  0x75, 0x08,                    //   REPORT_SIZE (8)
+	  0x95, USBD_CUSTOMHID_OUTREPORT_BUF_SIZE-1,       //   REPORT_COUNT (this is the byte length)
+	  0x09, 0x00,                    //   USAGE (Undefined)
+	  0x91, 0x82,                    //   OUTPUT (Data,Var,Abs,Vol)
+	  /* USER CODE END 0 */
+	  0xC0    /* END_COLLECTION */
 };
 
 /* USER CODE BEGIN PRIVATE_VARIABLES */
@@ -141,7 +131,9 @@ extern USBD_HandleTypeDef hUsbDeviceFS;
 
 static int8_t CUSTOM_HID_Init_FS(void);
 static int8_t CUSTOM_HID_DeInit_FS(void);
-static int8_t CUSTOM_HID_OutEvent_FS(uint8_t event_idx, uint8_t state);
+static int8_t CUSTOM_HID_OutEvent_FS(uint8_t *report, uint8_t report_len);
+static int8_t CUSTOM_HID_GetData(uint8_t *report, uint8_t *report_len);
+
 
 /**
   * @}
@@ -152,7 +144,8 @@ USBD_CUSTOM_HID_ItfTypeDef USBD_CustomHID_fops_FS =
   CUSTOM_HID_ReportDesc_FS,
   CUSTOM_HID_Init_FS,
   CUSTOM_HID_DeInit_FS,
-  CUSTOM_HID_OutEvent_FS
+  CUSTOM_HID_OutEvent_FS,
+  CUSTOM_HID_GetData
 };
 
 /** @defgroup USBD_CUSTOM_HID_Private_Functions USBD_CUSTOM_HID_Private_Functions
@@ -190,11 +183,29 @@ static int8_t CUSTOM_HID_DeInit_FS(void)
   * @param  state: Event state
   * @retval USBD_OK if all operations are OK else USBD_FAIL
   */
-static int8_t CUSTOM_HID_OutEvent_FS(uint8_t event_idx, uint8_t state)
+static int8_t CUSTOM_HID_OutEvent_FS(uint8_t *report, uint8_t report_len)
 {
   /* USER CODE BEGIN 6 */
-//  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, state);
-	HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2, DAC_ALIGN_12B_R, (uint32_t)((event_idx << 8) | state));
+  HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2, DAC_ALIGN_12B_R, (uint32_t)((report[2] << 8) | report[3]));
+
+  return (USBD_OK);
+  /* USER CODE END 6 */
+}
+
+static int8_t CUSTOM_HID_GetData(uint8_t *report, uint8_t *report_len)
+{
+  /* USER CODE BEGIN 6 */
+  uint32_t dacValue = 0;
+
+  report[0] = 0x1;
+  report[1] = !HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin);
+
+  dacValue = HAL_DAC_GetValue(&hdac, DAC_CHANNEL_2);
+  report[2] = dacValue >> 8;
+  report[3] = dacValue & 0xFF;
+
+  *report_len = 4;
+
   return (USBD_OK);
   /* USER CODE END 6 */
 }
