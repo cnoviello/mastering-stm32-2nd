@@ -310,7 +310,7 @@ __ALIGN_BEGIN static uint8_t USBD_CUSTOM_HID_OtherSpeedCfgDesc[USB_CUSTOM_HID_CO
 };
 
 /* USB CUSTOM_HID device Configuration Descriptor */
-__ALIGN_BEGIN static uint8_t USBD_CUSTOM_HID_Desc[USB_CUSTOM_HID_DESC_SIZ] __ALIGN_END =
+__ALIGN_BEGIN static const uint8_t USBD_CUSTOM_HID_Desc[USB_CUSTOM_HID_DESC_SIZ] __ALIGN_END =
 {
   /* 18 */
   0x09,         /*bLength: CUSTOM_HID Descriptor size*/

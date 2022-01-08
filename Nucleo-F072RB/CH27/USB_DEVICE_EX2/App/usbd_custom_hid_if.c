@@ -80,7 +80,7 @@ extern DAC_HandleTypeDef hdac;
   */
 
 /** Usb HID report descriptor. */
-__ALIGN_BEGIN static const uint8_t CUSTOM_HID_ReportDesc_FS[USBD_CUSTOM_HID_REPORT_DESC_SIZE] __ALIGN_END = {
+__ALIGN_BEGIN static uint8_t CUSTOM_HID_ReportDesc_FS[USBD_CUSTOM_HID_REPORT_DESC_SIZE] __ALIGN_END = {
 	/* USER CODE BEGIN 0 */
 	  0x05, 0x01,                    // USAGE_PAGE (Generic Desktop)
 	  0x09, 0x00,                    // USAGE (Undefined)

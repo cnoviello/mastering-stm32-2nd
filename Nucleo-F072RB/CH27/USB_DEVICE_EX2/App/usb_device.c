@@ -86,25 +86,12 @@ void MX_USB_DEVICE_Init(void)
   {
     Error_Handler();
   }
-
-  /* USER CODE BEGIN USB_DEVICE_Init_PostTreatment */
-  uint8_t report[4], reportLen;
-
-//  while(1) {
-//	  if(B1StatusChanged) {
-//		  B1StatusChanged = 0;
-//		  USBD_CustomHID_fops_FS.InEvent(report, &reportLen);
-//	      USBD_CUSTOM_HID_SendReport(&hUsbDeviceFS, report, reportLen);
-//	  }
-//	  HAL_Delay(200);
-//  }
-
-  /* USER CODE END USB_DEVICE_Init_PostTreatment */
 }
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+	uint8_t report[4], reportLen;
+
 	if(GPIO_Pin == B1_Pin) {
-		  uint8_t report[4], reportLen;
 		  USBD_CustomHID_fops_FS.GetData(report, &reportLen);
 	      USBD_CUSTOM_HID_SendReport(&hUsbDeviceFS, report, reportLen);
 		  HAL_Delay(200);
