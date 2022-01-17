@@ -201,7 +201,7 @@ void SystemInit(void)
   *           - If SYSCLK source is HSE, SystemCoreClock will contain the HSE_VALUE(**)
   *                          
   *           - If SYSCLK source is PLL, SystemCoreClock will contain the HSE_VALUE(**) 
-  *             or HSI_VALUE(*) multiplied/divided by the PLL factors.
+  *             or HSI_VALUE( *) multiplied/divided by the PLL factors.
   *         
   *         (*) HSI_VALUE is a constant defined in stm32f4xx_hal_conf.h file (default value
   *             16 MHz) but the real value may vary depending on the variations
