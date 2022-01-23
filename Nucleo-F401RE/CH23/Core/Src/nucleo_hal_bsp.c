@@ -1,6 +1,7 @@
 /* Includes --------------  ----------------------------------------------------*/
 #include "stm32f4xx_hal.h"
 #include "main.h"
+#include "FreeRTOSConfig.h"
 
 /* Private variables ---------------------------------------------------------*/
 UART_HandleTypeDef huart2;
@@ -127,6 +128,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(LD2_GPIO_Port, &GPIO_InitStruct);
 
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY, 0);
 }
 
 #ifdef USE_FULL_ASSERT

@@ -77,8 +77,10 @@ HAL_StatusTypeDef HAL_InitTick(uint32_t TickPriority)
 
   if(HAL_TIM_Base_Init(&htim2) == HAL_OK)
   {
+#ifndef EX7_TICKLESS
     /* Start the TIM time Base generation in interrupt mode */
     return HAL_TIM_Base_Start_IT(&htim2);
+#endif
   }
 
   /* Return function status */
@@ -109,3 +111,27 @@ void HAL_ResumeTick(void)
   __HAL_TIM_ENABLE_IT(&htim2, TIM_IT_UPDATE);
 }
 
+#ifndef EX7_TICKLESS
+
+/**
+  * @brief  Period elapsed callback in non blocking mode
+  * @note   This function is called  when TIM2 interrupt took place, inside
+  * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
+  * a global variable "uwTick" used as application time base.
+  * @param  htim : TIM handle
+  * @retval None
+  */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  /* USER CODE BEGIN Callback 0 */
+
+  /* USER CODE END Callback 0 */
+  if (htim->Instance == TIM2) {
+    HAL_IncTick();
+  }
+  /* USER CODE BEGIN Callback 1 */
+
+  /* USER CODE END Callback 1 */
+}
+
+#endif //!defined EX7_TICKLESS

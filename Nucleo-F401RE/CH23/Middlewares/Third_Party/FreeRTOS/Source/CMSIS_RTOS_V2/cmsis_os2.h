@@ -360,7 +360,7 @@ osThreadId_t osThreadGetId (void);
 /// Get current thread state of a thread.
 /// \param[in]     thread_id     thread ID obtained by \ref osThreadNew or \ref osThreadGetId.
 /// \return current thread state of the specified thread.
-osThreadState_t osThreadGetState (osThreadId_t thread_id);
+osThreadState_t suspendBlinkThread (osThreadId_t thread_id);
 
 /// Get stack size of a thread.
 /// \param[in]     thread_id     thread ID obtained by \ref osThreadNew or \ref osThreadGetId.

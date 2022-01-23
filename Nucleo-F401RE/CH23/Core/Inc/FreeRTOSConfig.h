@@ -56,6 +56,12 @@
 #define CMSIS_device_header "stm32f4xx.h"
 #endif /* CMSIS_device_header */
 
+#ifdef EX7_TICKLESS
+#define configUSE_TICKLESS_IDLE                  2
+#else
+#define configUSE_TICKLESS_IDLE                  0
+#endif
+
 #define configENABLE_FPU                         0
 #define configENABLE_MPU                         0
 
@@ -82,6 +88,23 @@
    if lengths will always be less than the number of bytes in a size_t. */
 #define configMESSAGE_BUFFER_LENGTH_TYPE         size_t
 /* USER CODE END MESSAGE_BUFFER_LENGTH_TYPE */
+
+#if configUSE_TICKLESS_IDLE == 2
+
+void SystemClock_Config(void);
+void preSLEEP(uint32_t xModifiableIdleTime);
+void postSLEEP(uint32_t xModifiableIdleTime);
+
+void preSTOP();
+void postSTOP();
+
+#define configPRE_SLEEP_PROCESSING(x) (preSLEEP(x))
+#define configPOST_SLEEP_PROCESSING(x) (postSLEEP(x))
+
+#define configPRE_STOP_PROCESSING(x) (preSTOP(x))
+#define configPOST_STOP_PROCESSING(x) (postSTOP(x))
+
+#endif
 
 /* Co-routine definitions. */
 #define configUSE_CO_ROUTINES                    0
@@ -164,7 +187,11 @@ standard names. */
 
 /* IMPORTANT: After 10.3.1 update, Systick_Handler comes from NVIC (if SYS timebase = systick), otherwise from cmsis_os2.c */
 
+#ifdef EX7_TICKLESS
 #define USE_CUSTOM_SYSTICK_HANDLER_IMPLEMENTATION 0
+#else
+#define USE_CUSTOM_SYSTICK_HANDLER_IMPLEMENTATION 1
+#endif
 
 /* USER CODE BEGIN Defines */
 /* Section where parameter definitions can be added (for instance, to override default ones in FreeRTOS.h) */

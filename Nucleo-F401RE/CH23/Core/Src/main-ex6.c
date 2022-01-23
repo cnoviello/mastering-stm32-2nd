@@ -20,51 +20,22 @@
 /* Includes ------------------------------------------------------------------*/
 #include "nucleo_hal_bsp.h"
 #include "cmsis_os.h"
-#include "retarget.h"
-#include <string.h>
-#include <stdio.h>
-#include <stdbool.h>
-#include <reent.h>
 
-/* Private variables ---------------------------------------------------------*/
-extern UART_HandleTypeDef huart2;
-
-/* Private function prototypes -----------------------------------------------*/
-void blinkThread(void *argument);
-void UARTThread(void  *argument);
-
-/* Definitions for blinkThread and UARTThread */
-osThreadId_t blinkThreadID;
-const osThreadAttr_t blinkThread_attr = {
-  .name = "blinkThread",
-  .priority = (osPriority_t) osPriorityNormal,
-  .stack_size = 128 * 4, /* In bytes */
-};
-
-osThreadId_t UARTThreadID;
-const osThreadAttr_t UARTThread_attr = {
-  .name = "UARTThread",
-  .stack_size = 128 * 4, /* In bytes */
-  .priority = (osPriority_t) osPriorityNormal,
-};
-
-osMessageQueueId_t msgQueueID;
+void blinkFunc(void *argument);
 
 int main(void) {
+  osTimerId_t timID;
+
   HAL_Init();
 
   Nucleo_BSP_Init();
-  RetargetInit(&huart2);
 
   /* Init scheduler */
   osKernelInitialize();
 
-  /* Creation of msgQueue */
-  msgQueueID = osMessageQueueNew(5, sizeof(uint16_t), NULL);
   /* Creation of blinkThread */
-  blinkThreadID = osThreadNew(blinkThread, NULL, NULL);
-  /* Creation of UARTThread */
-  UARTThreadID = osThreadNew(UARTThread, NULL, NULL);
+  timID = osTimerNew(blinkFunc, osTimerPeriodic, NULL, NULL);
+  osTimerStart(timID, 500);
 
   /* Start scheduler */
   osKernelStart();
@@ -73,31 +44,8 @@ int main(void) {
   while (1);
 }
 
-void blinkThread(void *argument) {
-  uint16_t delay = 500; /* Default delay */
-  uint16_t msg = 0;
-  osStatus_t status;
-
-  while(1) {
-    status = osMessageQueueGet(msgQueueID, &msg, 0, 10);
-    if(status == osOK)
-      delay = msg;
-
-    HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-    osDelay(delay);
-  }
-}
-
-void UARTThread(void *argument) {
-  uint16_t delay = 0;
-
-  while(1) {
-    printf("Specify the LD2 LED blink period: ");
-    fflush(stdout);
-    scanf("%hu", &delay);
-    printf("\r\nSpecified period: %hu\n\r", delay);
-    osMessageQueuePut(msgQueueID, &delay, 0, osWaitForever);
-  }
+void blinkFunc(void *argument) {
+  HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
 }
 
 #ifdef DEBUG

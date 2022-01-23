@@ -530,7 +530,7 @@ osThreadId_t osThreadGetId (void) {
   return (id);
 }
 
-osThreadState_t osThreadGetState (osThreadId_t thread_id) {
+osThreadState_t suspendBlinkThread (osThreadId_t thread_id) {
   TaskHandle_t hTask = (TaskHandle_t)thread_id;
   osThreadState_t state;
 
