@@ -50,6 +50,7 @@
 /* Ensure definitions are only used by the compiler, and not by the assembler. */
 #if defined(__ICCARM__) || defined(__CC_ARM) || defined(__GNUC__)
   #include <stdint.h>
+  #include "main.h"
   extern uint32_t SystemCoreClock;
 #endif
 #ifndef CMSIS_device_header
@@ -60,6 +61,26 @@
 #define configUSE_TICKLESS_IDLE                  2
 #else
 #define configUSE_TICKLESS_IDLE                  0
+#endif
+
+#ifdef EX8_TRACE
+#define configGENERATE_RUN_TIME_STATS            1
+#define configUSE_STATS_FORMATTING_FUNCTIONS     1
+
+#define portCONFIGURE_TIMER_FOR_RUN_TIME_STATS()        \
+  do {                                                  \
+    TIM_HandleTypeDef htim2;                            \
+    htim2.Instance = TIM2;                              \
+    htim2.Init.Prescaler = 4199; /*84MHz/4199 = 20KHz*/ \
+    htim2.Init.Period = 0xFFFFFFFF;                     \
+                                                        \
+    __TIM2_CLK_ENABLE();                                \
+    HAL_TIM_Base_Init(&htim2);                          \
+    HAL_TIM_Base_Start(&htim2);                         \
+  }while(0)
+
+
+#define portGET_RUN_TIME_COUNTER_VALUE() TIM2->CNT
 #endif
 
 #define configENABLE_FPU                         0
@@ -188,9 +209,9 @@ standard names. */
 /* IMPORTANT: After 10.3.1 update, Systick_Handler comes from NVIC (if SYS timebase = systick), otherwise from cmsis_os2.c */
 
 #ifdef EX7_TICKLESS
-#define USE_CUSTOM_SYSTICK_HANDLER_IMPLEMENTATION 0
-#else
 #define USE_CUSTOM_SYSTICK_HANDLER_IMPLEMENTATION 1
+#else
+#define USE_CUSTOM_SYSTICK_HANDLER_IMPLEMENTATION 0
 #endif
 
 /* USER CODE BEGIN Defines */

@@ -44,7 +44,6 @@ void xPortSysTickHandler( void );
 /* The callback function called by the HAL when TIM2 overflows. */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
   if (htim->Instance == TIM2) {
-    HAL_IncTick();
     xPortSysTickHandler();
 
     /* In case this is the first tick since the MCU left a low power mode.
@@ -55,6 +54,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
 
     /* The CPU woke because of a tick. */
     ucTickFlag = pdTRUE;
+  } else if (htim->Instance == TIM3) {
+      HAL_IncTick();
   }
 }
 /*-----------------------------------------------------------*/
@@ -161,7 +162,6 @@ void vPortSuppressTicksAndSleep(TickType_t xExpectedIdleTime) {
      configPOST_STOP_PROCESSING() is used to re-initialize the clocks that
      were turned off when STOP mode was entered. */
      configPOST_STOP_PROCESSING();
-     vPortSetupTimerInterrupt();
 
 #if defined(TICKLESS_DEBUG) && TICKLESS_DEBUG == 1
     if(ucSleepModeCalled == 1) { /* This ensures that the message is printed just once */

@@ -88,7 +88,7 @@ void blinkThread(void *argument) {
 void preSLEEP(uint32_t xModifiableIdleTime) {
   UNUSED(xModifiableIdleTime);
 
-//  HAL_SuspendTick();
+  HAL_SuspendTick();
   __enable_irq();
   __disable_irq();
 }
@@ -96,13 +96,13 @@ void preSLEEP(uint32_t xModifiableIdleTime) {
 void postSLEEP(uint32_t xModifiableIdleTime) {
   UNUSED(xModifiableIdleTime);
 
-  //HAL_ResumeTick();
+  HAL_ResumeTick();
 }
 
 void preSTOP() {
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
   __HAL_RCC_GPIOA_CLK_DISABLE();
-  //HAL_SuspendTick();
+  HAL_SuspendTick();
   __enable_irq();
   __disable_irq();
 }
@@ -110,7 +110,7 @@ void preSTOP() {
 void postSTOP() {
   SystemClock_Config();
   __HAL_RCC_GPIOA_CLK_ENABLE();
-  //HAL_ResumeTick();
+  HAL_ResumeTick();
 }
 
 
