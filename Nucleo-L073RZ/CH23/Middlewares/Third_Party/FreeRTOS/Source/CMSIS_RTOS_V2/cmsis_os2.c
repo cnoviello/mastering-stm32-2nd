@@ -1,5 +1,5 @@
 /* --------------------------------------------------------------------------
- * Portions Copyright © 2019 STMicroelectronics International N.V. All rights reserved.
+ * Portions Copyright ï¿½ 2019 STMicroelectronics International N.V. All rights reserved.
  * Copyright (c) 2013-2019 Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
@@ -151,6 +151,7 @@ extern void xPortSysTickHandler (void);
 /*
   SysTick handler implementation that also clears overflow flag.
 */
+#if (USE_CUSTOM_SYSTICK_HANDLER_IMPLEMENTATION == 0)
 void SysTick_Handler (void) {
   /* Clear overflow flag */
   SysTick->CTRL;
@@ -161,6 +162,7 @@ void SysTick_Handler (void) {
   }
 }
 #endif /* SysTick */
+#endif
 
 /*
   Setup SVC to reset value.

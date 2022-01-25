@@ -132,6 +132,7 @@ static void MX_GPIO_Init(void)
   HAL_NVIC_SetPriority(EXTI15_10_IRQn, configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY, 0);
 }
 
+
 #ifdef USE_FULL_ASSERT
 
 /**

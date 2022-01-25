@@ -516,7 +516,10 @@ void HAL_PWR_EnterSLEEPMode(uint32_t Regulator, uint8_t SLEEPEntry)
 
   /* Additional NOP to ensure all pending instructions are flushed before entering low power mode */
   __NOP();
-
+  __NOP();
+  __NOP();
+  __NOP();
+  __NOP();
 }
 
 /**

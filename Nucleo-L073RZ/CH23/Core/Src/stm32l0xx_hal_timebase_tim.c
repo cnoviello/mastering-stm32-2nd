@@ -109,3 +109,18 @@ void HAL_ResumeTick(void)
   __HAL_TIM_ENABLE_IT(&htim3, TIM_IT_UPDATE);
 }
 
+
+#ifndef EX7_TICKLESS
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  /* USER CODE BEGIN Callback 0 */
+
+  /* USER CODE END Callback 0 */
+  if (htim->Instance == TIM3) {
+    HAL_IncTick();
+  }
+  /* USER CODE BEGIN Callback 1 */
+
+  /* USER CODE END Callback 1 */
+}
+#endif
