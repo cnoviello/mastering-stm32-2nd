@@ -20,11 +20,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "nucleo_hal_bsp.h"
 #include "cmsis_os.h"
-#include "retarget.h"
 #include <string.h>
-#include <stdio.h>
-#include <stdbool.h>
-#include <reent.h>
 
 /* Private variables ---------------------------------------------------------*/
 extern UART_HandleTypeDef huart2;
@@ -37,31 +33,25 @@ void UARTThread(void  *argument);
 osThreadId_t blinkThreadID;
 const osThreadAttr_t blinkThread_attr = {
   .name = "blinkThread",
-  .priority = (osPriority_t) osPriorityNormal,
   .stack_size = 128 * 4, /* In bytes */
+  .priority = (osPriority_t) osPriorityNormal,
 };
 
 osThreadId_t UARTThreadID;
 const osThreadAttr_t UARTThread_attr = {
   .name = "UARTThread",
-  .stack_size = 256 * 4, /* In bytes; we need a larger stack since
-                            scanf() eats a lot of bytes */
-  .priority = (osPriority_t) osPriorityNormal,
+  .stack_size = 128 * 4, /* In bytes */
+  .priority = (osPriority_t) osPriorityAboveNormal,
 };
-
-osMessageQueueId_t msgQueueID;
 
 int main(void) {
   HAL_Init();
 
   Nucleo_BSP_Init();
-  RetargetInit(&huart2);
 
   /* Init scheduler */
   osKernelInitialize();
 
-  /* Creation of msgQueue */
-  msgQueueID = osMessageQueueNew(5, sizeof(uint16_t), NULL);
   /* Creation of blinkThread */
   blinkThreadID = osThreadNew(blinkThread, NULL, &blinkThread_attr);
   /* Creation of UARTThread */
@@ -75,29 +65,15 @@ int main(void) {
 }
 
 void blinkThread(void *argument) {
-  uint16_t delay = 500; /* Default delay */
-  uint16_t msg = 0;
-  osStatus_t status;
-
   while(1) {
-    status = osMessageQueueGet(msgQueueID, &msg, 0, 10);
-    if(status == osOK)
-      delay = msg;
-
     HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-    osDelay(delay);
+    osDelay(500);
   }
 }
 
 void UARTThread(void *argument) {
-  uint16_t delay = 0;
-
   while(1) {
-    printf("Specify the LD2 LED blink period: ");
-    fflush(stdout);
-    scanf("%hu", &delay);
-    printf("\r\nSpecified period: %hu\n\r", delay);
-    osMessageQueuePut(msgQueueID, &delay, 0, osWaitForever);
+    HAL_UART_Transmit(&huart2, (uint8_t *)"UARTThread\r\n", strlen("UARTThread\r\n"), HAL_MAX_DELAY);
   }
 }
 

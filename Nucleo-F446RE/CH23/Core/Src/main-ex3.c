@@ -45,7 +45,7 @@ osThreadId_t UARTThreadID;
 const osThreadAttr_t UARTThread_attr = {
   .name = "UARTThread",
   .stack_size = 256 * 4, /* In bytes; we need a larger stack since
-                            scanf() eats a lot of bytes */
+   	   	   	   	   	   	    scanf() eats a lot of bytes */
   .priority = (osPriority_t) osPriorityNormal,
 };
 

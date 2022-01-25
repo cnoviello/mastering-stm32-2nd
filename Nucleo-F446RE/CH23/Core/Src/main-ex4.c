@@ -31,7 +31,7 @@ extern UART_HandleTypeDef huart2;
 
 /* Private function prototypes -----------------------------------------------*/
 void blinkThread(void *argument);
-void UARTThread(void  *argument);
+void delayThread(void  *argument);
 
 /* Definitions for blinkThread and UARTThread */
 osThreadId_t blinkThreadID;
@@ -41,15 +41,14 @@ const osThreadAttr_t blinkThread_attr = {
   .stack_size = 128 * 4, /* In bytes */
 };
 
-osThreadId_t UARTThreadID;
-const osThreadAttr_t UARTThread_attr = {
-  .name = "UARTThread",
-  .stack_size = 256 * 4, /* In bytes; we need a larger stack since
-                            scanf() eats a lot of bytes */
+osThreadId_t delayThreadID;
+const osThreadAttr_t delayThread_attr = {
+  .name = "delayThread",
+  .stack_size = 128 * 4, /* In bytes */
   .priority = (osPriority_t) osPriorityNormal,
 };
 
-osMessageQueueId_t msgQueueID;
+osSemaphoreId_t semID;
 
 int main(void) {
   HAL_Init();
@@ -60,12 +59,13 @@ int main(void) {
   /* Init scheduler */
   osKernelInitialize();
 
-  /* Creation of msgQueue */
-  msgQueueID = osMessageQueueNew(5, sizeof(uint16_t), NULL);
+  /* Creation of binary semaphore */
+  semID = osSemaphoreNew(1, 1, NULL);
+  osSemaphoreAcquire(semID, osWaitForever);
   /* Creation of blinkThread */
-  blinkThreadID = osThreadNew(blinkThread, NULL, &blinkThread_attr);
+  blinkThreadID = osThreadNew(blinkThread, NULL, NULL);
   /* Creation of UARTThread */
-  UARTThreadID = osThreadNew(UARTThread, NULL, &UARTThread_attr);
+  delayThreadID = osThreadNew(delayThread, NULL, NULL);
 
   /* Start scheduler */
   osKernelStart();
@@ -75,29 +75,16 @@ int main(void) {
 }
 
 void blinkThread(void *argument) {
-  uint16_t delay = 500; /* Default delay */
-  uint16_t msg = 0;
-  osStatus_t status;
-
   while(1) {
-    status = osMessageQueueGet(msgQueueID, &msg, 0, 10);
-    if(status == osOK)
-      delay = msg;
-
+    osSemaphoreAcquire(semID, osWaitForever);
     HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-    osDelay(delay);
   }
 }
 
-void UARTThread(void *argument) {
-  uint16_t delay = 0;
-
+void delayThread(void *argument) {
   while(1) {
-    printf("Specify the LD2 LED blink period: ");
-    fflush(stdout);
-    scanf("%hu", &delay);
-    printf("\r\nSpecified period: %hu\n\r", delay);
-    osMessageQueuePut(msgQueueID, &delay, 0, osWaitForever);
+    osDelay(500);
+    osSemaphoreRelease(semID);
   }
 }
 

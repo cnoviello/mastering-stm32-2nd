@@ -31,7 +31,7 @@ extern UART_HandleTypeDef huart2;
 
 /* Private function prototypes -----------------------------------------------*/
 void blinkThread(void *argument);
-void UARTThread(void  *argument);
+void delayThread(void  *argument);
 
 /* Definitions for blinkThread and UARTThread */
 osThreadId_t blinkThreadID;
@@ -41,15 +41,17 @@ const osThreadAttr_t blinkThread_attr = {
   .stack_size = 128 * 4, /* In bytes */
 };
 
-osThreadId_t UARTThreadID;
-const osThreadAttr_t UARTThread_attr = {
-  .name = "UARTThread",
-  .stack_size = 256 * 4, /* In bytes; we need a larger stack since
-                            scanf() eats a lot of bytes */
+osThreadId_t delayThreadID;
+const osThreadAttr_t delayThread_attr = {
+  .name = "delayThread",
+  .stack_size = 128 * 4, /* In bytes */
   .priority = (osPriority_t) osPriorityNormal,
 };
 
-osMessageQueueId_t msgQueueID;
+#define FLAG_LED_BLINK        (uint32_t)0xb00000001
+#define FLAG_CHANGE_FREQUENCY (uint32_t)0xb00000010
+
+osEventFlagsId_t evtID;
 
 int main(void) {
   HAL_Init();
@@ -60,12 +62,12 @@ int main(void) {
   /* Init scheduler */
   osKernelInitialize();
 
-  /* Creation of msgQueue */
-  msgQueueID = osMessageQueueNew(5, sizeof(uint16_t), NULL);
+  /* Creation of a event flag */
+  evtID = osEventFlagsNew(NULL);
   /* Creation of blinkThread */
-  blinkThreadID = osThreadNew(blinkThread, NULL, &blinkThread_attr);
+  blinkThreadID = osThreadNew(blinkThread, NULL, NULL);
   /* Creation of UARTThread */
-  UARTThreadID = osThreadNew(UARTThread, NULL, &UARTThread_attr);
+  delayThreadID = osThreadNew(delayThread, NULL, NULL);
 
   /* Start scheduler */
   osKernelStart();
@@ -75,30 +77,40 @@ int main(void) {
 }
 
 void blinkThread(void *argument) {
-  uint16_t delay = 500; /* Default delay */
-  uint16_t msg = 0;
-  osStatus_t status;
-
   while(1) {
-    status = osMessageQueueGet(msgQueueID, &msg, 0, 10);
-    if(status == osOK)
-      delay = msg;
-
+    osEventFlagsWait(evtID, FLAG_LED_BLINK, osFlagsWaitAll, osWaitForever);
     HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-    osDelay(delay);
   }
 }
 
-void UARTThread(void *argument) {
-  uint16_t delay = 0;
+void delayThread(void *argument) {
+  uint8_t step = 100;
+  uint16_t delay = 500;
 
   while(1) {
-    printf("Specify the LD2 LED blink period: ");
-    fflush(stdout);
-    scanf("%hu", &delay);
-    printf("\r\nSpecified period: %hu\n\r", delay);
-    osMessageQueuePut(msgQueueID, &delay, 0, osWaitForever);
+    osEventFlagsSet(evtID, FLAG_LED_BLINK);
+
+    if(osEventFlagsWait(evtID, FLAG_CHANGE_FREQUENCY, osFlagsWaitAll, delay) != osFlagsErrorTimeout ) {
+      delay -= step;
+      switch(delay) {
+      case 100:
+        step = 50;
+        break;
+      case 50:
+        step = 25;
+        break;
+      case 0:
+        step = 100;
+        delay = 500;
+        break;
+      }
+    }
   }
+}
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+  if(GPIO_Pin == GPIO_PIN_13)
+    osEventFlagsSet(evtID, FLAG_CHANGE_FREQUENCY);
 }
 
 #ifdef DEBUG
