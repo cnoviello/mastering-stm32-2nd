@@ -29,8 +29,6 @@ TIM_HandleTypeDef htim2;
 
 void Error_Handler(void);
 void MX_ADC1_Init(void);
-//static void MX_SPI1_Init(void);
-static void MX_TIM2_Init(void);
 void SetupW5500Thread(void *argument);
 FRESULT scan_files (TCHAR* path);
 
@@ -137,8 +135,7 @@ void IO_LIBRARY_Init(void) {
   wizchip_setinterruptmask(IK_SOCK_0);
 }
 
-int main(void) {
-#ifdef OS_USE_SEMIHOSTING
+int main(void) {#ifdef OS_USE_SEMIHOSTING
   initialise_monitor_handles();
 #endif
 
@@ -207,8 +204,8 @@ void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc) {
   UNUSED(hadc);
 
   if(osSemaphoreAcquire(adcSemID, 0) == osOK) {
-      memcpy(adcConv, _adcConv, sizeof(uint16_t)*100);
-      osSemaphoreRelease(adcSemID);
+	  memcpy(adcConv, _adcConv, sizeof(uint16_t)*100);
+	  osSemaphoreRelease(adcSemID);
   }
 }
 

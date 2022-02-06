@@ -18,13 +18,13 @@ TIM_HandleTypeDef htim2;
 /* Private function prototypes -----------------------------------------------*/
 #ifdef CH26_EX2
 static void MX_ADC1_Init(void);
+static void MX_TIM2_Init(void);
 #endif
 
 static void MX_DMA_Init(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_SPI1_Init(void);
-static void MX_TIM2_Init(void);
 void SystemClock_Config(void);
 
 void Nucleo_BSP_Init() {
@@ -36,9 +36,9 @@ void Nucleo_BSP_Init() {
   MX_USART2_UART_Init();
   MX_DMA_Init();
   MX_SPI1_Init();
+#ifdef CH26_EX2
   MX_TIM2_Init();
   HAL_TIM_Base_Start(&htim2);
-#ifdef CH26_EX2
   MX_ADC1_Init();
 #endif
 
@@ -61,7 +61,7 @@ void SystemClock_Config(void)
   /** Configure the main internal regulator output voltage
   */
   __HAL_RCC_PWR_CLK_ENABLE();
-  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE2);
+  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE3);
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
@@ -73,7 +73,8 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLM = 16;
   RCC_OscInitStruct.PLL.PLLN = 336;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV4;
-  RCC_OscInitStruct.PLL.PLLQ = 7;
+  RCC_OscInitStruct.PLL.PLLQ = 2;
+  RCC_OscInitStruct.PLL.PLLR = 2;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -92,6 +93,58 @@ void SystemClock_Config(void)
     Error_Handler();
   }
 }
+
+/**
+  * @brief ADC1 Initialization Function
+  * @param None
+  * @retval None
+  */
+#ifdef CH26_EX2
+static void MX_ADC1_Init(void)
+{
+
+  /* USER CODE BEGIN ADC1_Init 0 */
+
+  /* USER CODE END ADC1_Init 0 */
+
+  ADC_ChannelConfTypeDef sConfig = {0};
+
+  /* USER CODE BEGIN ADC1_Init 1 */
+
+  /* USER CODE END ADC1_Init 1 */
+  /** Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion)
+  */
+  hadc1.Instance = ADC1;
+  hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV8;
+  hadc1.Init.Resolution = ADC_RESOLUTION_12B;
+  hadc1.Init.ScanConvMode = DISABLE;
+  hadc1.Init.ContinuousConvMode = DISABLE;
+  hadc1.Init.DiscontinuousConvMode = DISABLE;
+  hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_RISING;
+  hadc1.Init.ExternalTrigConv = ADC_EXTERNALTRIGCONV_T2_TRGO;
+  hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+  hadc1.Init.NbrOfConversion = 1;
+  hadc1.Init.DMAContinuousRequests = DISABLE;
+  hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
+  if (HAL_ADC_Init(&hadc1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
+  */
+  sConfig.Channel = ADC_CHANNEL_0;
+  sConfig.Rank = 1;
+  sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN ADC1_Init 2 */
+
+  /* USER CODE END ADC1_Init 2 */
+
+}
+#endif
 
 /**
   * @brief SPI1 Initialization Function
@@ -116,7 +169,7 @@ static void MX_SPI1_Init(void)
   hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi1.Init.NSS = SPI_NSS_SOFT;
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
   hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
@@ -132,6 +185,7 @@ static void MX_SPI1_Init(void)
 }
 
 /* TIM2 init function */
+#ifdef CH26_EX2
 static void MX_TIM2_Init(void) {
   TIM_ClockConfigTypeDef sClockSourceConfig;
   TIM_MasterConfigTypeDef sMasterConfig;
@@ -180,10 +234,10 @@ static void MX_TIM2_Init(void) {
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /* Peripheral interrupt init */
-  HAL_NVIC_SetPriority(TIM2_IRQn, 0, 0);
+  HAL_NVIC_SetPriority(TIM2_IRQn, configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY, 0);
   HAL_NVIC_EnableIRQ(TIM2_IRQn);
 }
-
+#endif
 
 /**
   * @brief USART2 Initialization Function
@@ -223,66 +277,6 @@ static void MX_USART2_UART_Init(void)
   * @param None
   * @retval None
   */
-#ifdef CH26_EX2
-/* ADC1 init function */
-void MX_ADC1_Init(void) {
-  ADC_ChannelConfTypeDef sConfig;
-  GPIO_InitTypeDef GPIO_InitStruct;
-
-  /* Enable ADC peripheral */
-  __HAL_RCC_ADC1_CLK_ENABLE();
-
-  /**Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion)
-   */
-  hadc1.Instance = ADC1;
-  hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV8;
-  hadc1.Init.Resolution = ADC_RESOLUTION_12B;
-  hadc1.Init.ScanConvMode = DISABLE;
-  hadc1.Init.ContinuousConvMode = DISABLE;
-  hadc1.Init.DiscontinuousConvMode = DISABLE;
-  hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_RISING;
-  hadc1.Init.ExternalTrigConv = ADC_EXTERNALTRIGCONV_T2_TRGO;
-  hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-  hadc1.Init.NbrOfConversion = 1;
-  hadc1.Init.DMAContinuousRequests = ENABLE;
-  hadc1.Init.EOCSelection = ADC_EOC_SEQ_CONV;
-  HAL_ADC_Init(&hadc1);
-
-  /**Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
-   */
-  sConfig.Channel = ADC_CHANNEL_0;
-  sConfig.Rank = 1;
-  sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
-  HAL_ADC_ConfigChannel(&hadc1, &sConfig);
-
-  /**ADC1 GPIO Configuration
-  PA0-WKUP     ------> ADC1_IN0
-  */
-  GPIO_InitStruct.Pin = GPIO_PIN_0;
-  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-  /* Peripheral DMA init*/
-  hdma_adc1.Instance = DMA2_Stream4;
-  hdma_adc1.Init.Channel = DMA_CHANNEL_0;
-  hdma_adc1.Init.Direction = DMA_PERIPH_TO_MEMORY;
-  hdma_adc1.Init.PeriphInc = DMA_PINC_DISABLE;
-  hdma_adc1.Init.MemInc = DMA_MINC_ENABLE;
-  hdma_adc1.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
-  hdma_adc1.Init.MemDataAlignment = DMA_MDATAALIGN_HALFWORD;
-  hdma_adc1.Init.Mode = DMA_CIRCULAR;
-  hdma_adc1.Init.Priority = DMA_PRIORITY_HIGH;
-  hdma_adc1.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
-  if (HAL_DMA_Init(&hdma_adc1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-
-  __HAL_LINKDMA(&hadc1,DMA_Handle,hdma_adc1);
-}
-#endif
-
 /**
   * Enable DMA controller clock
   */
@@ -293,17 +287,18 @@ static void MX_DMA_Init(void)
   __HAL_RCC_DMA2_CLK_ENABLE();
 
   /* DMA interrupt init */
+#ifdef CH26_EX2
   /* DMA2_Stream0_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 0, 0);
+  HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY, 0);
   HAL_NVIC_EnableIRQ(DMA2_Stream0_IRQn);
+#endif
+
+  /* DMA2_Stream2_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA2_Stream2_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA2_Stream2_IRQn);
   /* DMA2_Stream3_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA2_Stream3_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(DMA2_Stream3_IRQn);
-#ifdef CH26_EX2
-  /* DMA2_Stream4_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA2_Stream4_IRQn, configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY, 0);
-  HAL_NVIC_EnableIRQ(DMA2_Stream4_IRQn);
-#endif
 
 }
 
@@ -338,6 +333,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /* Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(SD_CS_GPIO_Port, SD_CS_Pin, GPIO_PIN_SET);
+
+  /* Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(W5500_CS_GPIO_Port, W5500_CS_Pin, GPIO_PIN_SET);
 
 }
 
